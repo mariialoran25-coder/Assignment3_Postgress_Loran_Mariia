@@ -1,0 +1,4 @@
+create database assignment3;
+
+create schema store;
+set search_path to store, public;
