@@ -132,3 +132,26 @@ CREATE TRIGGER t_update_order_total
 AFTER INSERT OR update or delete on store.order_items
 FOR EACH ROW
 EXECUTE FUNCTION update_order_total();
+
+
+
+
+-----------------TASK 5------------------------
+
+
+CREATE OR REPLACE FUNCTION Order_audit_log()
+RETURNS TRIGGER
+AS $$
+BEGIN
+    Insert into store.order_log(order_id, customer_id, action, log_date)
+    VALUES (New.order_id, new.customer_id, 'Insert', current_timestamp);
+
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER t_order_audit_log
+AFTER INSERT ON store.orders
+FOR EACH ROW
+EXECUTE FUNCTION Order_audit_log();
+
