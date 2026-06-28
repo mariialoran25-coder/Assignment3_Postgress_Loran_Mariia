@@ -155,3 +155,28 @@ AFTER INSERT ON store.orders
 FOR EACH ROW
 EXECUTE FUNCTION Order_audit_log();
 
+
+-----------------TASK 6------------------------
+
+INSERT INTO store.customers(full_name, email) VALUES ('Mariia Loran', 'mariia.loran@kse.org.ua');
+INSERT INTO store.products(product_name, price, stock_quantity)  VALUES ('Iphone17Pro',70000.00,10 );
+SELECT calculate_order_total(2);
+
+
+CALL create_order(1);
+CALL create_order(555);
+
+
+SELECT * FROM store.orders;
+
+CALL add_product_to_order(1,1,2);
+
+SELECT * FROM store.order_items;
+
+SELECT order_id ,total_amount FROM store.orders WHERE order_id =1;
+SELECT product_id ,stock_quantity FROM store.products WHERE product_id =1;
+SELECT * FROM store.order_items WHERE order_id =1;
+
+
+
+SELECT * FROM store.order_log;
