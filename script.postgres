@@ -4,7 +4,44 @@ create schema store;
 set search_path to store, public;
 
 
+сreate table customers (
+    customer_id serial primary key,
+    full_name varchar(100) not null,
+    email varchar(100) unique not null,
+    balance numeric(10,2) default 0
+);
 
+create table products (
+    product_id serial primary key,
+    product_name varchar(100) not null,
+    price numeric(10,2) not null,
+    stock_quantity int not null
+);
+
+create table orders (
+    order_id serial primary key,
+    customer_id int references customers(customer_id),
+    order_date timestamp default current_timestamp,
+    total_amount numeric(10,2) default 0
+);
+
+create table order_items (
+    order_item_id serial primary key,
+    order_id int references orders(order_id),
+    product_id int references products(product_id),
+    quantity int not null,
+    price numeric(10,2) not null
+);
+
+create table order_log (
+    log_id serial primary key,
+    order_id int,
+    customer_id int,
+    action varchar(50),
+    log_date timestamp default current_timestamp
+);
+
+-----------------TASK 1------------------------
 
 CREATE OR REPLACE FUNCTION calculate_order_total(p_order_id int)
 RETURNS NUMERIC
@@ -15,3 +52,32 @@ AS $$
 $$ LANGUAGE sql;
 
 
+-----------------TASK 2------------------------
+
+CREATE OR REPLACE PROCEDURE create_order1(p_customer_id int)
+LANGUAGE plpgsql
+AS $$
+BEGIN
+   INSERT INTO store.orders (customer_id, order_date, total_amount)
+   SELECT customer_id, current_timestamp,0
+   FROM store.customers
+   WHERE customer_id = p_customer_id;
+END ;
+$$;
+-- цей варіант якщо клієнта немає то він виводить 0 рядків і відповідно Insert нічого не вставляє
+
+
+CREATE OR REPLACE PROCEDURE create_order(p_customer_id int)
+LANGUAGE plpgsql
+AS $$
+BEGIN
+    IF EXISTS(SELECT 1 FROM store.customers Where customer_id = p_customer_id ) THEN
+        INSERT INTO store.orders (customer_id, order_date, total_amount)
+        VALUES (p_customer_id, current_timestamp,0);
+    else
+        raise exception 'Client % not found. Order not created', p_customer_id; -- не знаю чи варто вам тут показати що помилка виводиться чи якщо не існує клієнта то нічого не виводити.
+    END IF;
+END;
+$$;
+
+CALL create_order(3);
