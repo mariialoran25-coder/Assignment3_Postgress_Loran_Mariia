@@ -111,3 +111,24 @@ BEGIN
     WHERE product_id = p_product_id;
 END;
 $$;
+
+
+-----------------TASK 4------------------------
+
+CREATE OR REPLACE FUNCTION update_order_total()
+RETURNS TRIGGER
+AS $$
+BEGIN
+    UPDATE store.orders
+    SET total_amount = calculate_order_total(coalesce(NEW.order_id, OLD.order_id ))
+    WHERE order_id = coalesce(NEW.order_id, OLD.order_id );
+    RETURN NULL; -- після AFTER потрібно
+END;
+$$ LANGUAGE plpgsql;
+
+
+
+CREATE TRIGGER t_update_order_total
+AFTER INSERT OR update or delete on store.order_items
+FOR EACH ROW
+EXECUTE FUNCTION update_order_total();
