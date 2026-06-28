@@ -2,3 +2,16 @@ create database assignment3;
 
 create schema store;
 set search_path to store, public;
+
+
+
+
+CREATE OR REPLACE FUNCTION calculate_order_total(p_order_id int)
+RETURNS NUMERIC
+AS $$
+    SELECT COALESCE(SUM(quantity * price), 0)
+    FROM store.order_items
+    WHERE order_id = p_order_id;
+$$ LANGUAGE sql;
+
+
