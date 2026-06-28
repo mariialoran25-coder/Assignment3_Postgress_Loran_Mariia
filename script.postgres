@@ -79,5 +79,35 @@ BEGIN
     END IF;
 END;
 $$;
-
+-- теж 2 завдання , просто тут він виводе помилку що щось не так
 CALL create_order(3);
+
+
+-----------------TASK 3------------------------
+
+CREATE OR REPLACE PROCEDURE add_product_to_order(
+    p_order_id int,
+    p_product_id int,
+    p_quantity int
+)
+LANGUAGE plpgsql
+AS $$
+BEGIN
+    IF p_quantity <= 0 Then
+        raise exception 'Quantity must be more then 0';
+    end if;
+
+    UPDATE store.products
+    SET stock_quantity = stock_quantity - p_quantity
+    WHERE product_id = p_product_id AND stock_quantity >= p_quantity ;
+
+    if not found then
+        raise exception 'Product not fount';
+    end if;
+
+    INSERT INTO store.order_items ( order_id, product_id, quantity, price)
+    SELECT p_order_id, p_product_id,p_quantity, price
+    FROM store.products
+    WHERE product_id = p_product_id;
+END;
+$$;
